@@ -2,36 +2,44 @@
 Routes and views for the flask application.
 """
 
-from datetime import datetime
-from flask import render_template
+from DynaZOR import db
+import pyodbc
+from flask import *
+from flask_cors import CORS
 from DynaZOR import app
+from dotenv import load_dotenv
+import os
+from os import environ
 
-@app.route('/')
-@app.route('/home')
-def home():
-    """Renders the home page."""
-    return render_template(
-        'index.html',
-        title='Home Page',
-        year=datetime.now().year,
-    )
+load_dotenv()
 
-@app.route('/contact')
-def contact():
-    """Renders the contact page."""
-    return render_template(
-        'contact.html',
-        title='Contact',
-        year=datetime.now().year,
-        message='Your contact page.'
-    )
 
-@app.route('/about')
-def about():
-    """Renders the about page."""
-    return render_template(
-        'about.html',
-        title='About',
-        year=datetime.now().year,
-        message='Your application description page.'
-    )
+@app.post("/api/auth/login")
+def login():
+    data = request.get_json()
+    email = data.get("email")
+    password = data.get("password")
+
+    row = db.checkUserLogin(email,password)
+    if row:
+        return jsonify({"success": True, "message": "Login Successful"})
+    else:
+        return jsonify({"success": False, "message": "Login Failed"})
+
+
+@app.post("/api/user/add")
+def register():
+    data = request.get_json()
+    name = data.get("name")
+    surname = data.get("surname")
+    username = data.get("username")
+    email = data.get("email")
+    password = data.get("password")
+    name = (name + " " + surname)
+
+    row = db.checkUserExist(username,email)
+    if row:
+        return jsonify({"success": False, "message": "Username or email has already been registered"})
+    else:
+        db.createUser(name,username,email,password)
+        return jsonify({"success": True, "message": "User is registered successfully"})

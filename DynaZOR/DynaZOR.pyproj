@@ -28,6 +28,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="DynaZOR\db.py" />
     <Compile Include="runserver.py" />
     <Compile Include="DynaZOR\__init__.py" />
     <Compile Include="DynaZOR\views.py" />

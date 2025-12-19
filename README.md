@@ -5,56 +5,48 @@ This repository contains the frontend implementation of the DynaZOR Scheduling S
 The frontend is built using Vite, React, Tailwind CSS, and communicates with the backend through Axios based API functions.
 
 The primary features currently implemented include:
+Home page:
+<img width="2399" height="1342" alt="image" src="https://github.com/user-attachments/assets/18519ea0-a5be-46fe-b90c-971cd6c924a3" />
 
 User Login
-> To see login page make sure to route to localhost/login:
 
 <img width="2389" height="1323" alt="image" src="https://github.com/user-attachments/assets/b8453641-75e4-4d02-9d68-34e394651b84" />
 
--> Error handling of user login
-Email is a required field and has to have a '@'.
-
-<img width="588" height="612" alt="image" src="https://github.com/user-attachments/assets/416c3de3-1584-4ee3-9c31-e73e9f0f4d82" />
-
-<img width="653" height="624" alt="image" src="https://github.com/user-attachments/assets/b2b7f361-0efc-465c-90ea-9c572c307964" />
-
-Password is also a required field.
-
-<img width="559" height="591" alt="image" src="https://github.com/user-attachments/assets/6eb370bd-9c5c-480a-86a4-825af094f252" />
-
-If another error occurs, it is shown above:
-
-<img width="566" height="663" alt="image" src="https://github.com/user-attachments/assets/fa85c427-28e0-424c-bf05-6bca0201d759" />
+The login component has the necessary error handling such as required fields.
 
 -> User can route to register page if they click the Register link.
 
 <img width="312" height="68" alt="image" src="https://github.com/user-attachments/assets/2178db40-6a03-4299-8d95-c7f02fb5c7e3" />
 
 User Registration
-> To see register page make sure to route to localhost/register:
 
 <img width="2388" height="1323" alt="image" src="https://github.com/user-attachments/assets/50a7218e-1452-497e-9b31-d2be4e1f4246" />
 
--> Error handling of user register
-Fields are all required just like login.
-
-<img width="662" height="954" alt="image" src="https://github.com/user-attachments/assets/d1cc3931-bfe7-47b5-a357-98c7a7c8e3bd" />
-
-If another error occurs, it is shown above:
-
-<img width="649" height="1036" alt="image" src="https://github.com/user-attachments/assets/c1af0774-b9a9-4802-83ab-ae75753ac156" />
+The register component has the necessary error handling such as required fields, the backend gives a 409 error if user already exists.
 
 -> User can route to login page if they click the Login link.
 
 <img width="319" height="66" alt="image" src="https://github.com/user-attachments/assets/61134462-03bf-49fe-9af0-4430df4843bc" />
 
-Weekly Schedule view with clickable schedule cells:
-> To see the schedule page make sure to route to localhost/schedule:
+Daily Schedule view with clickable schedule cells:
 
-<img width="2358" height="1333" alt="image" src="https://github.com/user-attachments/assets/1786fe24-1fdf-4d4d-af5a-ac7c1fa431d2" />
+<img width="2399" height="1335" alt="image" src="https://github.com/user-attachments/assets/3d05538c-ea32-4435-a11c-761a9e395c01" />
 
-Choosing hours:
-<img width="1232" height="814" alt="resim" src="https://github.com/user-attachments/assets/180988fc-9196-4199-aec7-4c79ae21362c" />
+User can toggle the availabilty of the slots by clicking the cells. 
+
+Making an appointment:
+
+<img width="2376" height="780" alt="image" src="https://github.com/user-attachments/assets/046b44e9-3369-4652-9bd7-0dfb94b66a31" />
+
+When this button is cliked the user is asked the username of the user they wish to get an appointment from. This component also has the necessary error handling such as making sure the username exists. 
+
+<img width="1151" height="275" alt="image" src="https://github.com/user-attachments/assets/a17fe1ea-684a-4cd7-9d0a-591657da1051" />
+
+<img width="2395" height="1340" alt="image" src="https://github.com/user-attachments/assets/b229459d-ed18-43de-8290-f80cc8833cba" />
+
+When the user submits the username theyre routed to the schedule of the user they wished to take the appointment from. They can select and submit at most 3 available timeslots for the backend algorithm to calculate and give response with the best booking time.
+
+<img width="2395" height="1346" alt="image" src="https://github.com/user-attachments/assets/18f09c29-ea84-42ad-9f78-e5b17edd4711" />
 
 Backend of the DynaZOR
 This repository contains the backend implementation of the DynaZOR Scheduling System in the DynaZOR (backend and frontend merged for testing) and BackendTemp (for future backend operations) folders of the repository, developed as part of the CNG 495 Capstone Project (Fall 2025).
@@ -63,5 +55,3 @@ The backend is built using Python and Flask micro framework, on Visual Studio.
 Its main purpose is to maintain the data in the Microsoft SQL Server cloud database that is on the Amazon RDS cloud service, recieve and process the request of the frontend (such as login info, or registeration process) and basically handle the communication between the frontend and the cloud database without any problems.
 
 More features will be added as the project progresses.
-
-

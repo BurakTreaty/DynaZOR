@@ -32,6 +32,10 @@ def get_conn():
 def get_cursor():
     return get_conn().cursor()
 
+# Global connection/cursor helpers for legacy calls below
+conn = get_conn()
+cursor = conn.cursor()
+
 def createTables():
     cursor.execute("IF OBJECT_ID('timeslots','U') IS NOT NULL DROP TABLE timeslots;")
     cursor.execute("IF OBJECT_ID('userSchedule','U') IS NOT NULL DROP TABLE userSchedule;")

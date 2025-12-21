@@ -1,11 +1,11 @@
 # db.py
-from dotenv import load_dotenv
-import sqlite3
+# from dotenv import load_dotenv
+# import sqlite3
 import pyodbc
-import os
+# import os
 from datetime import date
 
-load_dotenv()
+# load_dotenv()
 # conn = pyodbc.connect(
 #         f"DRIVER={{ODBC Driver 17 for SQL Server}};"
 #         f"SERVER={os.getenv('SQLSERVER_HOST')};"
@@ -13,7 +13,27 @@ load_dotenv()
 #         f"UID={os.getenv('SQLSERVER_USER')};"
 #         f"PWD={os.getenv('SQLSERVER_PASS')}",
 # )
-conn = sqlite3.connect("local_test.db")
+SERVER_NAME = r".\SQLEXPRESS"  # or "(localdb)\MSSQLLocalDB"
+DATABASE_NAME = "SchedulerLocalDB"
+conn_master = pyodbc.connect(
+        f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+        f"SERVER={SERVER_NAME};"
+        "DATABASE=master;"
+        "Trusted_Connection=yes;",
+        autocommit=True
+    )
+cursor_master = conn_master.cursor()
+    
+cursor_master.execute(f"IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = '{DATABASE_NAME}') CREATE DATABASE {DATABASE_NAME}")
+cursor_master.close()
+conn_master.close()
+
+conn = pyodbc.connect(
+    f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+    f"SERVER={SERVER_NAME};"
+    f"DATABASE={DATABASE_NAME};"
+    "Trusted_Connection=yes;"
+)
 cursor = conn.cursor()
 
 
@@ -241,7 +261,3 @@ def isBooked(timeslotID):
     """, (timeslotID,))
     row = cursor.fetchone()
     return row[0] == 0 
-
-
-
-

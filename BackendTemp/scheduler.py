@@ -36,13 +36,12 @@ class User:
             nextDay = lastDay + timedelta(days=1)
             day_id = db.insertScheduleDay(self.id, nextDay)
             for hour, minute in self.timeslotGen(8, 17, 45):
-                db.insertTimeSlot(day_id, hour, minute, 0)
+                db.insertTimeSlot(day_id, hour, minute, 1)
             lastDay = nextDay
     
     def schedulerAlgorithm(self,dateStr,timeStr,appointingUserID):
         hour, minute = map(int, timeStr.split(":"))
         timeslotID =  db.getTimeslotID(self.id, dateStr, hour, minute)
-        waitlist = db.getWaitList(timeslotID)
         if db.isBooked(timeslotID):
             db.addWaitList(timeslotID, appointingUserID)
         else:

@@ -14,6 +14,7 @@ app.config["CORS_HEADERS"] = "Content-Type"
 CORS(
 	app,
 	resources={r"/api/*": {"origins": [
+    "http://localhost:5173", 
     "https://dyna-zor-3ybi.vercel.app"
     ]}},
 	supports_credentials=True,

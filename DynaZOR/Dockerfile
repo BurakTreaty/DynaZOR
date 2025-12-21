@@ -23,7 +23,7 @@ RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor 
 
 # Install the Microsoft ODBC driver
 RUN apt-get update && ACCEPT_EULA=Y apt-get install -y --no-install-recommends \
-    msodbcsql18 \
+    msodbcsql17 \
     && rm -rf /var/lib/apt/lists/*
 
 # App setup

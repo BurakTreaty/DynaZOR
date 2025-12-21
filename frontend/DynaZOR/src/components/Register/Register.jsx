@@ -33,12 +33,10 @@ export default function Register() {
       const today = new Date().toISOString().split("T")[0];
       await createSchedule({ userID, scheduleDate: today });
 
-      // Persist viewer identity
-      localStorage.setItem("viewerID", String(userID));
-      localStorage.setItem("viewerRole", "owner");
+      localStorage.setItem("userID", String(userID));
 
       setTimeout(() => {
-        navigate("/schedule", { state: { userID } });
+        navigate("/dashboard", { state: { userID } });
       }, 1000);
     } catch (err) {
       if (err.response?.status === 409) {

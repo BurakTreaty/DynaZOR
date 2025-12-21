@@ -56,6 +56,12 @@ def getUserID(username):
     return row[0] if row else None
 
 
+def getAllUsers():
+    cursor.execute("SELECT userID FROM users")
+    rows = cursor.fetchall()
+    return [row[0] for row in rows]
+
+
 def checkUserLogin(email,password):
     cursor.execute("SELECT * FROM users WHERE email=? AND password=?", (email, password))
     row = cursor.fetchone()
@@ -142,21 +148,28 @@ def getSchedule(userID):
     cursor.execute("""
         SELECT scheduleID, scheduleDate FROM userSchedule
         WHERE userID=?
-        ORDER BY scheduleDate
+        ORDER BY scheduleDate DESC
     """, (userID,))
-    days = cursor.fetchall()
-
-    schedule = []
-
-    for scheduleID, scheduleDate in days:
-        cursor.execute("""
-            SELECT hour, minute, available FROM timeslots
-            WHERE scheduleID=? ORDER BY hour, minute
-        """, (scheduleID,))
-        timeSlots = cursor.fetchall()
-        schedule.append((scheduleDate, timeSlots))
-
-    return schedule
+    row = cursor.fetchone()
+    
+    if not row:
+        return [] 
+    
+    scheduleID, scheduleDate = row
+    
+    cursor.execute("""
+        SELECT hour, minute, available FROM timeslots
+        WHERE scheduleID=? ORDER BY hour, minute
+    """, (scheduleID,))
+    timeSlots = cursor.fetchall()
+    
+    return [{
+        'date': str(scheduleDate),
+        'timeslots': [
+            {'hour': ts[0], 'minute': ts[1], 'available': ts[2]}
+            for ts in timeSlots
+        ]
+    }]
 
 def toggleSlotDB(userID, date, hour, minute):
     cursor.execute("""

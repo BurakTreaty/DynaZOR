@@ -5,17 +5,17 @@ import { useLocation, useNavigate } from "react-router-dom";
 const SchedulePage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const userID = state?.userID;
-  const viewerID = localStorage.getItem("viewerID");
-  const viewerRole = localStorage.getItem("viewerRole") || "user";
+
+  // prefer the target user's ID from navigation state; fall back to current user
+  const targetUserID = state?.userID || localStorage.getItem("userID");
 
   useEffect(() => {
-    if (!userID) {
-    navigate("/login");
+    if (!targetUserID) {
+      navigate("/login");
     }
-  }, [])
+  }, [targetUserID, navigate]);
 
-  return <Schedule userID={userID} viewerID={viewerID} viewerRole={viewerRole} />
+  return <Schedule userID={targetUserID} />
 }
 
 export default SchedulePage

@@ -1,6 +1,7 @@
 const BASE_ENDPOINT = {
   USERS: "/api/user",
   AUTH: "/api/auth",
+  ADMIN: "/api/admin",
 };
 
 export const ENDPOINTS = {
@@ -9,6 +10,13 @@ export const ENDPOINTS = {
   AUTH_LOGIN: `${BASE_ENDPOINT.AUTH}/login`,
   AUTH_REGISTER: `${BASE_ENDPOINT.AUTH}/register`,
   USER_ID_BY_USERNAME_GET: `${BASE_ENDPOINT.USERS}/search`,
+  USER_GET: `${BASE_ENDPOINT.USERS}/id`,
   TIMESLOT_TOGGLE: `${BASE_ENDPOINT.USERS}/timeslot`,
   APPOINTMENT_SUBMIT: `${BASE_ENDPOINT.USERS}/appointment`,
+  ADMIN_AUTH: `${BASE_ENDPOINT.ADMIN}/auth`,
+  ADMIN_INIT: `${BASE_ENDPOINT.ADMIN}/init`,
+  ADMIN_RESET: `${BASE_ENDPOINT.ADMIN}/reset`,
+  ADMIN_VIEW: `${BASE_ENDPOINT.ADMIN}/view`,
+  ADMIN_BACKUP: `${BASE_ENDPOINT.ADMIN}/backup`,
+  ADMIN_MODIFY: `${BASE_ENDPOINT.ADMIN}/modify`,
 };

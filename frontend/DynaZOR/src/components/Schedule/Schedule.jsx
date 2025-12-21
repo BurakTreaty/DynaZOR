@@ -1,26 +1,25 @@
 import { useState, useEffect, useMemo } from "react";
 import ScheduleTable from "./ScheduleTable";
-import MakeAppointment from "./MakeAppointment";
+import Appointment from "../Appointment/Appointment";
 import { userApi } from "../../apis/userApi";
 
-export default function Schedule({ userID, viewerID, viewerRole }) {
+export default function Schedule({ userID }) {
   const [schedule, setSchedule] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
-  const [selectedSlots, setSelectedSlots] = useState([]); // for viewers
-  const { getSchedule, getUserByUsername, toggleTimeslot } = userApi();
+  const [selectedSlots, setSelectedSlots] = useState([]); 
+  const { getSchedule, getUserByUsername, toggleTimeslot, getUser } = userApi();
 
-  // Determine if viewer can edit: owner or admin
+  // Determine if viewer or visitor.
   const isOwner = useMemo(() => {
-    if (!userID) return false;
-    if (viewerRole === "owner") return true;
-    if (viewerRole === "viewer") return false;
-    return false;
-  }, [userID, viewerRole]);
+  const currentUserID = parseInt(localStorage.getItem("userID"));
+  console.log(currentUserID)
+  console.log(userID)
+  return currentUserID === parseInt(userID);
+  }, [userID]);
 
   useEffect(() => {
     const loadSchedule = async () => {
-      console.log(isOwner)
       try {
         setLoading(true);
         const data = await getSchedule(userID);
@@ -140,7 +139,7 @@ export default function Schedule({ userID, viewerID, viewerRole }) {
         </div>
 
         {/* Make appointment button */}
-        {isOwner && <MakeAppointment getUserByUsername = {getUserByUsername} />}
+        {isOwner && <Appointment getUserByUsername = {getUserByUsername} getUser={getUser} />}
 
         {/* Submit selection for viewers */}
         {!isOwner && (

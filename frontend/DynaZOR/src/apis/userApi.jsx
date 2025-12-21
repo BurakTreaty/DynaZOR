@@ -30,6 +30,11 @@ export const userApi = () => {
       const response = await axios.post(`${ENDPOINTS.APPOINTMENT_SUBMIT}/${userID}`, { selections });
       return response.data;
     };
+  
+  const getUser = async (userID) => {
+      const response = await axios.get(`${ENDPOINTS.USER_GET}/${userID}`);
+      return response.data;
+  }
 
-  return { getSchedule, createSchedule, getUserByUsername, toggleTimeslot, submitAppointment };
+  return { getSchedule, createSchedule, getUserByUsername, toggleTimeslot, submitAppointment, getUser };
 };

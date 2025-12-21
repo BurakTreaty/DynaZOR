@@ -63,20 +63,22 @@ class Schedule(Resource):
     """Get or create user schedule"""
     def get(self, user_id):
         try:
-            schedule = db.getSchedule(user_id)
+            from datetime import datetime
+            today = datetime.now().date()
             
-            formatted_schedule = []
-            if schedule:
-                for date, timeslots in schedule:
-                    formatted_schedule.append({
-                        'date': str(date),
-                        'timeslots': [
-                            {'hour': ts[0], 'minute': ts[1], 'available': ts[2]}
-                            for ts in timeslots
-                        ]
-                    })
-
-            return {'schedule': formatted_schedule}, 200
+            # Check if user has a schedule for today
+            db.cursor.execute("""
+                SELECT scheduleID FROM userSchedule
+                WHERE userID=? AND scheduleDate=?
+            """, (user_id, today))
+            existing = db.cursor.fetchone()
+            
+            # Create if doesn't exist
+            if not existing:
+                db.createSchedule(user_id, today)
+            
+            schedule = db.getSchedule(user_id)
+            return {'schedule': schedule}, 200
         except Exception as e:
             abort(500, message=str(e))
 
@@ -131,6 +133,25 @@ class User(Resource):
             abort(500, message=str(e))
 
 
+class UserByID(Resource):
+    """Get user details by user ID"""
+    def get(self, user_id):
+        try:
+            cursor = db.cursor
+            cursor.execute("SELECT userID, name, username, email FROM users WHERE userID = ?", (user_id,))
+            row = cursor.fetchone()
+            if row is None:
+                abort(404, message="User not found")
+            return {
+                'userID': row[0],
+                'name': row[1],
+                'username': row[2],
+                'email': row[3]
+            }, 200
+        except Exception as e:
+            abort(500, message=str(e))
+
+
 class Appointment(Resource):
     """Submit up to 3 timeslot selections for a user (viewer)"""
     #CHANGE THE ALGORITHM AS NEEDED
@@ -161,3 +182,4 @@ class Appointment(Resource):
                 abort(500, message=str(e))
 
         return { 'message': 'Appointment submitted', 'booked': booked }, 200
+    

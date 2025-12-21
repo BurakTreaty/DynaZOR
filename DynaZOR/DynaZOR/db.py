@@ -171,7 +171,7 @@ def getSchedule(userID):
     scheduleID, scheduleDate = row
     
     cursor.execute("""
-        SELECT hour, minute, available FROM timeslots
+        SELECT hour, minute, available, bookedByUserID FROM timeslots
         WHERE scheduleID=? ORDER BY hour, minute
     """, (scheduleID,))
     timeSlots = cursor.fetchall()
@@ -179,7 +179,7 @@ def getSchedule(userID):
     return [{
         'date': str(scheduleDate),
         'timeslots': [
-            {'hour': ts[0], 'minute': ts[1], 'available': int(ts[2])}
+            {'hour': ts[0], 'minute': ts[1], 'available': int(ts[2]), 'bookedByUserID': ts[3]}
             for ts in timeSlots
         ]
     }]
@@ -242,18 +242,23 @@ def addWaitList(timeslot_id, user_id):
 def freeSlotDB(timeSlotID):
     cursor.execute("""
         UPDATE timeslots
-        SET available = 1, bookedByUserID = NULL
+        SET bookedByUserID = NULL
         WHERE timeSlotID = ?
     """, (timeSlotID,))
     conn.commit()
     return cursor.rowcount
 
-def addAppointmentDB(timeslotID, userID):
+def addAppointmentDB(timeslotID, appointedTimeslotID, userID):
     cursor.execute("""
         UPDATE timeslots 
-        SET available = 0, bookedByUserID = ?
+        SET bookedByUserID = ?
         WHERE timeSlotID = ?
     """, (userID, timeslotID))
+    cursor.execute("""
+        UPDATE timeslots
+        SET available = 0
+        WHERE timeSlotID = ?
+    """, (appointedTimeslotID,))
     conn.commit()
 
 def removeFromWaitlist(timeslot_id, user_id):
@@ -265,12 +270,12 @@ def removeFromWaitlist(timeslot_id, user_id):
 
 def isBooked(timeslotID):
     cursor.execute("""
-        SELECT available 
+        SELECT bookedByUserID 
         FROM timeslots 
         WHERE timeSlotID = ?
     """, (timeslotID,))
     row = cursor.fetchone()
-    return row[0] == 0 
+    return row[0] != None 
 
 def getTimeslotID(user_id, date_str, hour, minute):
     cursor.execute("""
@@ -286,22 +291,42 @@ def getTimeslotID(user_id, date_str, hour, minute):
     return row[0]
 
 def schedulerAlgorithm(userID,dateStr,hour,minute,appointingUserID):
-    timeslotID =  getTimeslotID(userID, dateStr, hour, minute)
-    if isBooked(timeslotID):
-        addWaitList(timeslotID, appointingUserID)
+    appointed_user_timeslotID =  getTimeslotID(appointingUserID, dateStr, hour, minute)
+    user_timeslotID =  getTimeslotID(userID, dateStr, hour, minute)
+    if isBooked(user_timeslotID):
+        addWaitList(user_timeslotID, appointingUserID)
     else:
-        addAppointmentDB(timeslotID, appointingUserID)
+        addAppointmentDB(user_timeslotID, appointed_user_timeslotID, appointingUserID)
 
-def reSchedulerAlgorithm(userID, dateStr, timeStr):
-    hour, minute = map(int, timeStr.split(":"))
-    timeslotID = getTimeslotID(userID, dateStr, hour, minute)
+def reSchedulerAlgorithm(userID, date, hour, minute):
+    timeslotID = getTimeslotID(userID, date, hour, minute)
     waitlist = getWaitList(timeslotID)
 
     if not waitlist:
         freeSlotDB(timeslotID)
+        return None
     else:
         priorityUser = waitlist[0] # The one with lowest priorityNo
         priorityUserID = priorityUser['user_id']
-        addAppointmentDB(timeslotID, priorityUserID)
+        priorityUser_timeslotID =  getTimeslotID(priorityUserID, date, hour, minute)
+        addAppointmentDB(timeslotID, priorityUser_timeslotID, priorityUserID)
         removeFromWaitlist(timeslotID, priorityUserID)
+        return priorityUser['email']
 
+def reopenSlotForBooker(user_id, date, hour, minute):
+    timeslotID = getTimeslotID(user_id, date, hour, minute)
+    cursor.execute("""
+        UPDATE timeslots
+        SET available = 1
+        WHERE timeSlotID = ?
+    """, (timeslotID,))
+    conn.commit()
+
+def getUsernameByID(user_id):
+    cursor.execute("""
+        SELECT username
+        FROM users
+        WHERE userID = ?
+    """, (user_id,))
+    row = cursor.fetchone()
+    return row

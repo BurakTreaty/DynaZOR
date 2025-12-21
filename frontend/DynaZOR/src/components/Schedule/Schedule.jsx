@@ -8,7 +8,7 @@ export default function Schedule({ userID }) {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
   const [selectedSlots, setSelectedSlots] = useState([]); 
-  const { getSchedule, getUserByUsername, toggleTimeslot, getUser } = userApi();
+  const { getSchedule, getUserByUsername, toggleTimeslot, getUser, cancelAppointment } = userApi();
 
   // Determine if viewer or visitor.
   const isOwner = useMemo(() => {
@@ -37,9 +37,34 @@ export default function Schedule({ userID }) {
     if (userID) loadSchedule();
   }, [userID]);
 
-  const handleCellClick = async ({ time, day }) => {
+  const handleCellClick = async ({ time, day, isBookedByCurrentUser}) => {
     const [hour, minute] = time.split(':').map(Number);
+	const currentUserID = parseInt(localStorage.getItem("userID"));
 
+	if (isBookedByCurrentUser) {
+		if (window.confirm("Do you want to cancel this appointment?")){
+			try {
+				setLoading(true);
+				const payload = {
+					bookerID: currentUserID,
+					selections: [{date: day, hour, minute}]
+				};
+				await cancelAppointment(userID, payload);
+				setMessage(["Appointment Canceled", "success"]);
+				const data = await getSchedule(userID);
+                setSchedule(data?.schedule || []);
+				const key = `${day}|${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
+                setSelectedSlots(selectedSlots.filter((s) => s.key !== key));
+			} catch (err) {
+				console.error("Error toggling timeslot:", err);
+				setMessage(["Failed to update timeslot", "error"]);
+			} finally {
+				setLoading(false);
+			}
+		}
+		return;
+	}
+	
     // Owner: toggle directly on backend
     if (isOwner) {
       try {

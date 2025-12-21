@@ -7,6 +7,11 @@ from flask_restful import Resource, reqparse, abort
 from flask import request
 from . import db
 from datetime import datetime, timedelta
+import os
+import boto3
+
+TOPIC_ARN = os.getenv('SNS_TOPIC_ARN')
+sns_client = boto3.client("sns",region_name=os.getenv("AWS_REGION"))
 
 
 class Register(Resource):
@@ -28,7 +33,7 @@ class Register(Resource):
         try:
             full_name = f"{args['name']} {args['surname']}"
             db.createUser(full_name, args['username'], args['email'], args['password'])
-            
+            sns_client.subscribe(TopicArn=TOPIC_ARN, Protocol="email", Endpoint=args['email']) # subscribing to SNS
             # Get the newly created user's ID
             userID = db.getUserID(args['username'])
             
@@ -183,4 +188,45 @@ class Appointment(Resource):
                 abort(500, message=str(e))
 
         return { 'message': 'Appointment submitted', 'booked': booked }, 200
+
+    def delete(self, user_id):
+        username = db.getUsernameByID(user_id)
+        payload = request.get_json(force=True) or {}
+        selections = payload.get('selections', [])
+        booker_id = payload.get("bookerID")
+
+        if not booker_id:
+            abort(400, message="bookerID is required")
+        if not isinstance(selections, list) or not selections:
+            abort(400, message="selections must be a non-empty array")
+
+        canceled = []
+        for sel in selections:
+            try:
+                date = sel.get('date')
+                hour = int(sel.get('hour'))
+                minute = int(sel.get('minute'))
+            except Exception:
+                abort(400, message="Each selection must include date (YYYY-MM-DD), hour, minute")
+
+            try:
+                db.reopenSlotForBooker(booker_id,date,hour,minute)
+                waitingUserEmail = db.reSchedulerAlgorithm(user_id,date,hour,minute)
+                canceled.append({'date': date, 'hour': hour, 'minute': minute})
+                if (waitingUserEmail):
+                    sns_client.publish(
+                        TopicArn=TOPIC_ARN, 
+                        Message=f"A spot for the appointment with {username} opened up on {date} at {hour}:{minute}!",
+                        Subject="Appointment Rescheduled",
+                        MessageAttributes={
+                            'target_email': {
+                                'DataType': 'String',
+                                'StringValue': waitingUserEmail
+                            }
+                        }
+                    )
+            except Exception as e:
+                abort(500, message=str(e))
+
+        return { 'message': 'Appointment canceled', 'canceled': canceled }, 200
     

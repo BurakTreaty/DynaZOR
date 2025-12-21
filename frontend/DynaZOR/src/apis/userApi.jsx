@@ -35,6 +35,11 @@ export const userApi = () => {
       const response = await axios.get(`${ENDPOINTS.USER_GET}/${userID}`);
       return response.data;
   }
+  
+  const cancelAppointment = async(userID, payload) => {
+	  const response = await axios.delete(`${ENDPOINTS.APPOINTMENT_SUBMIT}/${userID}`, {data: payload});
+	  return response.data
+  }
 
-  return { getSchedule, createSchedule, getUserByUsername, toggleTimeslot, submitAppointment, getUser };
+  return { getSchedule, createSchedule, getUserByUsername, toggleTimeslot, submitAppointment, getUser, cancelAppointment };
 };

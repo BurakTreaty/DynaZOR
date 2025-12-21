@@ -1,10 +1,12 @@
 export default function ScheduleCell({ time, day, item, onClick, isOwner, selected }) {
-  const isAvailable = item?.available === 1;
+  const currentUserID = parseInt(localStorage.getItem('userID'));
+  const isAvailable = item?.available === 1 && item?.bookedByUserID !== currentUserID;
+  const isBookedByCurrentUser = item?.available === 1 && item?.bookedByUserID === currentUserID
   const isBooked = item?.available === 0;
 
   const handleClick = () => {
     if (onClick) {
-      onClick({ time, day, item });
+      onClick({ time, day, item, isBookedByCurrentUser});
     }
   };
 
@@ -16,6 +18,7 @@ export default function ScheduleCell({ time, day, item, onClick, isOwner, select
         ${!item ? `${isOwner ? 'bg-gray-100 hover:bg-gray-200' : 'bg-gray-100'} border-2 border-dashed border-gray-300` : ''}
         ${isAvailable ? `${isOwner ? 'bg-gradient-to-br from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600' : 'bg-gradient-to-br from-green-400 to-emerald-500'} shadow-lg border-2 border-green-400` : ''}
         ${isBooked ? `${isOwner ? 'bg-gradient-to-br from-red-400 to-rose-500 hover:from-red-500 hover:to-rose-600' : 'bg-gradient-to-br from-red-400 to-rose-500'} shadow-lg border-2 border-red-400` : ''}
+		${isBookedByCurrentUser ? `bg-gradient-to-br from-blue-400 to-indigo-500 hover:from-blue-500 hover:to-indigo-600 shadow-lg border-2 border-blue-400` : ''}
         ${!isOwner && selected ? 'ring-4 ring-indigo-400 scale-[1.02]' : ''}
         ${isOwner ? '' : 'opacity-95'}
         flex items-center justify-center group relative overflow-hidden
@@ -57,6 +60,16 @@ export default function ScheduleCell({ time, day, item, onClick, isOwner, select
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
             <span className="text-xs font-bold text-white mt-1 drop-shadow">Busy</span>
+          </div>
+        )}
+		
+		{isBookedByCurrentUser && (
+          <div className="flex flex-col items-center">
+            <svg className="w-8 h-8 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+            </svg>
+            <span className="text-xs font-bold text-white mt-1 drop-shadow group-hover:hidden">My Slot</span>
+            <span className="text-xs font-bold text-white mt-1 drop-shadow hidden group-hover:block">Cancel?</span>
           </div>
         )}
 

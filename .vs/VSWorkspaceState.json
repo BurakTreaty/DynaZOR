@@ -1,7 +1,8 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\BackendTemp"
   ],
-  "SelectedNode": "\\DynaZOR.sln",
+  "SelectedNode": "\\BackendTemp\\scheduler.py",
   "PreviewInSolutionExplorer": false
 }

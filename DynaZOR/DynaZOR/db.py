@@ -56,6 +56,12 @@ def getUserID(username):
     return row[0] if row else None
 
 
+def getAllUsers():
+    cursor.execute("SELECT userID FROM users")
+    rows = cursor.fetchall()
+    return [row[0] for row in rows]
+
+
 def checkUserLogin(email,password):
     cursor.execute("SELECT * FROM users WHERE email=? AND password=?", (email, password))
     row = cursor.fetchone()
@@ -78,6 +84,30 @@ def deletePastDays(userID, today: date):
     """, (userID, today))
     conn.commit()
 
+def createSchedule(userID, scheduleDate):
+    cursor.execute("""
+        INSERT INTO userSchedule(userID, scheduleDate)
+        OUTPUT INSERTED.scheduleID
+        VALUES (?, ?)
+    """, (userID, scheduleDate))
+    
+    scheduleID = cursor.fetchone()[0]
+    
+    timeslots = [
+        (8, 0), (8, 45), (9, 30), (10, 15), (11, 0), (11, 45),
+        (12, 30), (13, 15), (14, 0), (14, 45), (15, 30), (16, 15),
+        (17, 0), (17, 45)
+    ]
+    
+    # Make all timeslots available on default
+    for hour, minute in timeslots:
+        cursor.execute("""
+            INSERT INTO timeslots(scheduleID, hour, minute, available)
+            VALUES (?, ?, ?, 1)
+        """, (scheduleID, hour, minute))
+    
+    conn.commit()
+    return scheduleID
 
 def getLastScheduleDay(userID):
     cursor.execute("""
@@ -107,8 +137,6 @@ def insertScheduleDay(userID, scheduleDate):
     conn.commit()
     return user_id
 
-
-
 def insertTimeSlot(scheduleID, hour, minute, available):
     cursor.execute("""
         INSERT INTO timeslots(scheduleID, hour, minute, available)
@@ -120,26 +148,33 @@ def getSchedule(userID):
     cursor.execute("""
         SELECT scheduleID, scheduleDate FROM userSchedule
         WHERE userID=?
-        ORDER BY scheduleDate
+        ORDER BY scheduleDate DESC
     """, (userID,))
-    days = cursor.fetchall()
+    row = cursor.fetchone()
+    
+    if not row:
+        return [] 
+    
+    scheduleID, scheduleDate = row
+    
+    cursor.execute("""
+        SELECT hour, minute, available FROM timeslots
+        WHERE scheduleID=? ORDER BY hour, minute
+    """, (scheduleID,))
+    timeSlots = cursor.fetchall()
+    
+    return [{
+        'date': str(scheduleDate),
+        'timeslots': [
+            {'hour': ts[0], 'minute': ts[1], 'available': ts[2]}
+            for ts in timeSlots
+        ]
+    }]
 
-    schedule = []
-
-    for scheduleID, scheduleDate in days:
-        cursor.execute("""
-            SELECT hour, minute, available FROM timeslots
-            WHERE scheduleID=? ORDER BY hour, minute
-        """, (scheduleID,))
-        timeSlots = cursor.fetchall()
-        schedule.append((scheduleDate, timeSlots))
-
-    return schedule
-
-def freeSlotDB(userID, date, hour, minute):
+def toggleSlotDB(userID, date, hour, minute):
     cursor.execute("""
         UPDATE timeslots
-        SET available = 1
+        SET available = CASE WHEN available = 1 THEN 0 ELSE 1 END
         WHERE hour = ?
           AND minute = ?
           AND scheduleID = (

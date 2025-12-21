@@ -1,15 +1,22 @@
 const BASE_ENDPOINT = {
   USERS: "/api/user",
-  SCHEDULES: "/api/schedule",
-  AUTH: "/api/auth"
-  // Add other endpoints here
+  AUTH: "/api/auth",
+  ADMIN: "/api/admin",
 };
 
 export const ENDPOINTS = {
-  USER_LIST: `${BASE_ENDPOINT.USERS}/list`,
-  USER_ADD: `${BASE_ENDPOINT.USERS}/add`,
-  SCHEDULE_LIST: `${BASE_ENDPOINT.SCHEDULES}/list`,
-  SCHEDULE_ADD: `${BASE_ENDPOINT.SCHEDULES}/add`,
+  SCHEDULE_GET: `${BASE_ENDPOINT.USERS}/schedule`,
+  SCHEDULE_CREATE: `${BASE_ENDPOINT.USERS}/schedule`,
   AUTH_LOGIN: `${BASE_ENDPOINT.AUTH}/login`,
-  // Add other specific endpoints here
+  AUTH_REGISTER: `${BASE_ENDPOINT.AUTH}/register`,
+  USER_ID_BY_USERNAME_GET: `${BASE_ENDPOINT.USERS}/search`,
+  USER_GET: `${BASE_ENDPOINT.USERS}/id`,
+  TIMESLOT_TOGGLE: `${BASE_ENDPOINT.USERS}/timeslot`,
+  APPOINTMENT_SUBMIT: `${BASE_ENDPOINT.USERS}/appointment`,
+  ADMIN_AUTH: `${BASE_ENDPOINT.ADMIN}/auth`,
+  ADMIN_INIT: `${BASE_ENDPOINT.ADMIN}/init`,
+  ADMIN_RESET: `${BASE_ENDPOINT.ADMIN}/reset`,
+  ADMIN_VIEW: `${BASE_ENDPOINT.ADMIN}/view`,
+  ADMIN_BACKUP: `${BASE_ENDPOINT.ADMIN}/backup`,
+  ADMIN_MODIFY: `${BASE_ENDPOINT.ADMIN}/modify`,
 };

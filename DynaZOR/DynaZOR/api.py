@@ -4,7 +4,7 @@ Defines all endpoints for user authentication, registration, and schedule manage
 """
 
 from flask_restful import Resource, reqparse, abort
-from flask import request
+from flask import request, session
 from . import db
 from datetime import datetime, timedelta
 import os
@@ -182,6 +182,8 @@ class Appointment(Resource):
 
             # Book the slot (viewer requests translate to booking for simplicity)
             try:
+                if not (db.checkOwnAvailability):
+                    abort(400, message=f"Your schedule is not available for timeslot {hour}:{minute}")
                 db.schedulerAlgorithm(user_id, date, hour, minute, booker_id)
                 booked.append({'date': date, 'hour': hour, 'minute': minute})
             except Exception as e:
@@ -230,3 +232,58 @@ class Appointment(Resource):
 
         return { 'message': 'Appointment canceled', 'canceled': canceled }, 200
     
+
+class Analytics(Resource):
+    def get(self, user_id):
+        try:
+            frequent_slot = db.getMostFrequentSlotOfUser(user_id)
+            formatted_slot = ""
+            if frequent_slot:
+                h,m = frequent_slot[0], frequent_slot[1]
+                formatted_slot = f"{h:02d}:{m:02d}"
+
+            top_bookers = db.getTopBookers(user_id)
+            bookers_list = []
+            if top_bookers:
+                for i in top_bookers:
+                    bookers_list.append({"name": i[0], "count": i[1]})
+
+            return {
+                "frequent_hour": formatted_slot,
+                "top_bookers": bookers_list
+            },200
+
+        except Exception as e:
+            abort(500, message=str(e))
+
+class AdminInitialize(Resource):
+    # initializes or resets the database
+    def post(self):
+        try:
+            db.createTables()
+            return {"message":"Database initialized!"}, 200
+        except Exception as e:
+            abort(500, message=f"Initialization failed: {str(e)}")
+
+class AdminUserList(Resource):
+    #shows all user info and their bookings
+    def get(self):
+        try:
+            rows = db.getAllUsersInfo()
+            user_list = []
+            for row in rows:
+                user_id = row[0]
+                user_bookings = db.getUserBookings(user_id)
+                user_list.append({
+                    "userID": row[0],
+                    "name": row[1],
+                    "username": row[2],
+                    "email": row[3],
+                    "bookings": user_bookings,
+                    "booking_count": len(user_bookings) 
+                })
+
+            return {"user_count": len(user_list), "user_list": user_list}
+
+        except Exception as e:
+            abort(500, message=str(e))

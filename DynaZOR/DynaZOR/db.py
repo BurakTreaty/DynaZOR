@@ -19,6 +19,7 @@ def createTables():
     cursor.execute("IF OBJECT_ID('priorityQueue','U') IS NOT NULL DROP TABLE priorityQueue;")
     cursor.execute("IF OBJECT_ID('timeslots','U') IS NOT NULL DROP TABLE timeslots;")
     cursor.execute("IF OBJECT_ID('userSchedule','U') IS NOT NULL DROP TABLE userSchedule;")
+    cursor.execute("IF OBJECT_ID('appointmentStats','U') IS NOT NULL DROP TABLE appointmentStats;")
     cursor.execute("IF OBJECT_ID('users','U') IS NOT NULL DROP TABLE users;")
 
     cursor.execute("""
@@ -58,6 +59,19 @@ def createTables():
         PRIMARY KEY (timeSlotID, userID),
         FOREIGN KEY (timeSlotID) REFERENCES timeslots(timeSlotID),
         FOREIGN KEY (userID) REFERENCES users(userID)
+    );
+    """)
+
+    cursor.execute("""
+    CREATE TABLE appointmentStats (
+        ownerUserID INT,       
+        bookerUserID INT,      
+        hour INT,              
+        minute INT,
+        bookingCount INT DEFAULT 0,
+        PRIMARY KEY (ownerUserID, bookerUserID, hour, minute),
+        FOREIGN KEY (ownerUserID) REFERENCES users(userID),
+        FOREIGN KEY (bookerUserID) REFERENCES users(userID)
     );
     """)
     conn.commit()
@@ -297,6 +311,7 @@ def schedulerAlgorithm(userID,dateStr,hour,minute,appointingUserID):
         addWaitList(user_timeslotID, appointingUserID)
     else:
         addAppointmentDB(user_timeslotID, appointed_user_timeslotID, appointingUserID)
+        updateAnalytics(userID, appointingUserID, hour, minute)
 
 def reSchedulerAlgorithm(userID, date, hour, minute):
     timeslotID = getTimeslotID(userID, date, hour, minute)
@@ -310,6 +325,7 @@ def reSchedulerAlgorithm(userID, date, hour, minute):
         priorityUserID = priorityUser['user_id']
         priorityUser_timeslotID =  getTimeslotID(priorityUserID, date, hour, minute)
         addAppointmentDB(timeslotID, priorityUser_timeslotID, priorityUserID)
+        updateAnalytics(userID,priorityUserID, hour, minute)
         removeFromWaitlist(timeslotID, priorityUserID)
         return priorityUser['email']
 
@@ -330,3 +346,82 @@ def getUsernameByID(user_id):
     """, (user_id,))
     row = cursor.fetchone()
     return row
+
+def getMostFrequentSlotOfUser(userID):
+    cursor.execute("""
+        SELECT TOP 1 hour, minute, SUM(bookingCount) as total
+        FROM appointmentStats
+        WHERE ownerUserID = ?
+        GROUP BY hour, minute
+        ORDER BY total DESC
+    """, (userID,))
+    
+    row = cursor.fetchone()
+    if row:
+        return row
+    return None
+
+def getTopBookers(userID):
+    cursor.execute("""
+        SELECT TOP 3 u.name, SUM(s.bookingCount) as total
+        FROM appointmentStats s
+        JOIN users u ON s.bookerUserID = u.userID
+        WHERE s.ownerUserID = ?
+        GROUP BY u.name
+        ORDER BY total DESC
+    """, (userID,))
+    rows = cursor.fetchall()
+    if rows:
+        return rows
+    return None
+	
+def updateAnalytics(ownerID, bookerID, hour, minute):
+    """
+    Updates the unified stats table.
+    """
+    cursor.execute("""
+        UPDATE appointmentStats 
+        SET bookingCount = bookingCount + 1
+        WHERE ownerUserID = ? AND bookerUserID = ? AND hour = ? AND minute = ?
+    """, (ownerID, bookerID, hour, minute))
+    if cursor.rowcount == 0:
+        cursor.execute("""
+            INSERT INTO appointmentStats (ownerUserID, bookerUserID, hour, minute, bookingCount)
+            VALUES (?, ?, ?, ?, 1)
+        """, (ownerID, bookerID, hour, minute))
+
+    conn.commit()
+
+def getAllUsersInfo():
+    cursor.execute("SELECT userID, name, username, email, password FROM users")
+    return cursor.fetchall()
+
+def getUserBookings(user_id):
+    #gets all the appointments booked by the user
+    cursor.execute("""
+        SELECT 
+            us.scheduleDate,
+            ts.hour,
+            ts.minute,
+            uOwner.name
+         FROM timeslots ts
+         JOIN userSchedule us ON ts.scheduleID = us.scheduleID
+         JOIN users uOwner ON us.userID = uOwner.userID
+         WHERE ts.bookedByUserID = ?
+         ORDER BY us.scheduleDate DESC, ts.hour ASC
+    """, (user_id,))
+
+    return cursor.fetchall()
+
+def checkOwnAvailability(user_id, hour, minute):
+    cursor.execute("""
+        SELECT ts.available
+        FROM timeslots ts
+        JOIN userSchedule us ON ts.scheduleID = us.scheduleID
+        WHERE ts.hour = ?
+        AND ts.minute = ?
+        AND us.userID = ?
+    """, (hour,minute,user_id))
+
+    row = cursor.fetchone()
+    return row[0]

@@ -182,8 +182,7 @@ class Appointment(Resource):
             # Ensure the booker's own schedule is free for the requested slot
             is_available = db.checkOwnAvailability(booker_id, hour, minute, date)
             if not is_available:
-                abort(400, message=f"Your schedule is not available for timeslot {hour}:{minute}")
-
+                abort(400, message=f"Your schedule is not available for timeslot {hour:02d}:{minute:02d}")
             try:
                 db.schedulerAlgorithm(user_id, date, hour, minute, booker_id)
                 booked.append({'date': date, 'hour': hour, 'minute': minute})

@@ -6,7 +6,7 @@ Defines all endpoints for user authentication, registration, and schedule manage
 from flask_restful import Resource, reqparse, abort
 from flask import request, session, current_app
 from . import db
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import os
 import boto3
 
@@ -360,18 +360,58 @@ class AdminView(Resource):
             for row in rows:
                 user_id = row[0]
                 user_bookings = db.getUserBookings(user_id)
+                # Convert booking rows to serializable format
+                bookings_list = [
+                    {
+                        'date': str(booking[0]),
+                        'hour': booking[1],
+                        'minute': booking[2],
+                        'owner_name': booking[3]
+                    } for booking in user_bookings
+                ]
                 user_list.append({
                     'userID': row[0],
                     'name': row[1],
                     'username': row[2],
                     'email': row[3],
-                    'bookings': user_bookings,
-                    'booking_count': len(user_bookings)
+                    'bookings': bookings_list,
+                    'booking_count': len(bookings_list)
                 })
+            
+            # Get schedules
+            db.cursor.execute("SELECT scheduleID, userID, scheduleDate FROM userSchedule ORDER BY scheduleDate DESC")
+            schedule_rows = db.cursor.fetchall()
+            schedules_list = []
+            for sched in schedule_rows:
+                # Get username for display
+                db.cursor.execute("SELECT username FROM users WHERE userID = ?", (sched[1],))
+                username_row = db.cursor.fetchone()
+                schedules_list.append({
+                    'scheduleID': sched[0],
+                    'userID': sched[1],
+                    'username': username_row[0] if username_row else 'Unknown',
+                    'date': str(sched[2])
+                })
+            
+            # Get timeslots (limited to avoid overwhelming response)
+            db.cursor.execute("SELECT TOP 100 timeSlotID, scheduleID, hour, minute, available, bookedByUserID FROM timeslots ORDER BY scheduleID DESC")
+            timeslot_rows = db.cursor.fetchall()
+            timeslots_list = [
+                {
+                    'timeSlotID': ts[0],
+                    'scheduleID': ts[1],
+                    'hour': ts[2],
+                    'minute': ts[3],
+                    'available': ts[4],
+                    'bookedByUserID': ts[5]
+                } for ts in timeslot_rows
+            ]
             
             return {
                 'user_count': len(user_list),
-                'user_list': user_list,
+                'users': user_list,
+                'schedules': schedules_list,
+                'timeslots': timeslots_list,
                 'message': 'Database view retrieved successfully'
             }, 200
         except Exception as e:
@@ -395,9 +435,25 @@ class AdminBackup(Resource):
             if backup_data is None:
                 abort(500, message="Backup failed")
             
+            # Convert Row objects to serializable format, handling date objects
+            def serialize_value(value):
+                """Convert non-JSON-serializable types to strings"""
+                if isinstance(value, date):
+                    return str(value)
+                elif isinstance(value, datetime):
+                    return value.isoformat()
+                else:
+                    return value
+            
+            serializable_backup = {}
+            for table_name, rows in backup_data.items():
+                serializable_backup[table_name] = [
+                    tuple(serialize_value(val) for val in row) for row in rows
+                ]
+            
             return {
                 'message': 'Database backed up successfully',
-                'backup': backup_data
+                'backup': serializable_backup
             }, 200
         except Exception as e:
             abort(500, message=f"Backup failed: {str(e)}")

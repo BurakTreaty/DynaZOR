@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import Schedule from "../components/Schedule/Schedule"
+import Navbar from "../components/Navbar/Navbar";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const SchedulePage = () => {
@@ -15,7 +16,12 @@ const SchedulePage = () => {
     }
   }, [targetUserID, navigate]);
 
-  return <Schedule userID={targetUserID} />
+  return (
+    <>
+      <Navbar userID={localStorage.getItem("userID")}/>
+      <Schedule userID={targetUserID} />
+    </>
+  )
 }
 
 export default SchedulePage

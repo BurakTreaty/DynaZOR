@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import Dashboard from "../components/Dashboard/Dashboard";
+import Navbar from "../components/Navbar/Navbar";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const DashboardPage = () => {
@@ -14,7 +15,12 @@ const DashboardPage = () => {
     }
   }, [])
 
-  return <Dashboard userID={ID}/>;
+  return (
+    <>
+      <Navbar userID={ID}/>
+      <Dashboard userID={ID}/>
+    </>
+  )
 };
 
 export default DashboardPage;

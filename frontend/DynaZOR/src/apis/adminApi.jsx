@@ -1,3 +1,8 @@
+import { getAxiosInstance } from "./Axios";
+import { ENDPOINTS } from "./enpointConstants";
+
+const axios = getAxiosInstance();
+
 export const adminApi = () => {
 
   const authenticate = async (password) => {

@@ -8,6 +8,7 @@ export default function Admin() {
   const [message, setMessage] = useState(null);
   const [databaseData, setDatabaseData] = useState(null);
   const [modifyUser, setModifyUser] = useState({ userID: '', name: '', username: '', email: '' });
+  const [expandedTimeslotId, setExpandedTimeslotId] = useState(null);
 
   const { authenticate, initDB, resetDB, viewDB, backupDB, modifyDB } = adminApi();
 
@@ -91,7 +92,7 @@ export default function Admin() {
     }
     try {
       setLoading(true);
-      await modifyDB(adminPassword, 'update_user', parseInt(modifyUser.userID), modifyUser.name, modifyUser.username, modifyUser.email);
+      await modifyDB(adminPassword, 'update', parseInt(modifyUser.userID), modifyUser.name, modifyUser.username, modifyUser.email);
       setMessage(['User updated successfully', 'success']);
       setModifyUser({ userID: '', name: '', username: '', email: '' });
       const data = await viewDB(adminPassword);
@@ -107,7 +108,7 @@ export default function Admin() {
     if (!window.confirm(`Delete user ${userID} and all their data? This cannot be undone.`)) return;
     try {
       setLoading(true);
-      await modifyDB(adminPassword, 'delete_user', userID, null, null, null);
+      await modifyDB(adminPassword, 'delete', userID, null, null, null);
       setMessage(['User deleted successfully', 'success']);
       const data = await viewDB(adminPassword);
       setDatabaseData(data);
@@ -282,22 +283,56 @@ export default function Admin() {
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr style={{ background: '#f3f4f6' }}>
-                      <th style={{ padding: '0.75rem', textAlign: 'left', borderRight: '1px solid #e5e7eb', fontWeight: 600 }}>Schedule</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'left', borderRight: '1px solid #e5e7eb', fontWeight: 600 }}>Time</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 600 }}>Available</th>
+                      <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 600 }}>Schedule ID</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {databaseData.timeslots?.slice(0, 50).map((ts, i) => (
-                      <tr key={i} style={{ borderTop: '1px solid #e5e7eb' }}>
-                        <td style={{ padding: '0.75rem', borderRight: '1px solid #e5e7eb' }}>{ts.scheduleID}</td>
-                        <td style={{ padding: '0.75rem', borderRight: '1px solid #e5e7eb' }}>{String(ts.hour).padStart(2, '0')}:{String(ts.minute).padStart(2, '0')}</td>
-                        <td style={{ padding: '0.75rem' }}>{ts.available === 1 ? '✓' : '✗'}</td>
-                      </tr>
+                    {[...new Set(databaseData.timeslots?.map(ts => ts.scheduleID))].map((scheduleID) => (
+                      <>
+                        <tr 
+                          key={`schedule-${scheduleID}`}
+                          onClick={() => setExpandedTimeslotId(expandedTimeslotId === scheduleID ? null : scheduleID)}
+                          style={{ 
+                            borderTop: '1px solid #e5e7eb', 
+                            cursor: 'pointer',
+                            background: expandedTimeslotId === scheduleID ? '#f9fafb' : 'transparent'
+                          }}
+                        >
+                          <td style={{ padding: '0.75rem' }}>
+                            {expandedTimeslotId === scheduleID ? '▼' : '▶'} Schedule {scheduleID}
+                          </td>
+                        </tr>
+                        {expandedTimeslotId === scheduleID && (
+                          <tr style={{ background: '#fafafa' }}>
+                            <td style={{ padding: '1rem', borderTop: '1px solid #e5e7eb' }}>
+                              <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '0.5rem' }}>
+                                <thead>
+                                  <tr style={{ background: '#f0f1f3' }}>
+                                    <th style={{ padding: '0.5rem', textAlign: 'left', borderRight: '1px solid #e5e7eb', fontWeight: 600, fontSize: '0.875rem' }}>Timeslot ID</th>
+                                    <th style={{ padding: '0.5rem', textAlign: 'left', borderRight: '1px solid #e5e7eb', fontWeight: 600, fontSize: '0.875rem' }}>Time</th>
+                                    <th style={{ padding: '0.5rem', textAlign: 'left', borderRight: '1px solid #e5e7eb', fontWeight: 600, fontSize: '0.875rem' }}>Available</th>
+                                    <th style={{ padding: '0.5rem', textAlign: 'left', fontWeight: 600, fontSize: '0.875rem' }}>Booked By</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {databaseData.timeslots?.filter(ts => ts.scheduleID === scheduleID).map((ts, i) => (
+                                    <tr key={i} style={{ borderTop: '1px solid #e5e7eb' }}>
+                                      <td style={{ padding: '0.5rem', borderRight: '1px solid #e5e7eb' }}>{ts.timeSlotID}</td>
+                                      <td style={{ padding: '0.5rem', borderRight: '1px solid #e5e7eb' }}>{String(ts.hour).padStart(2, '0')}:{String(ts.minute).padStart(2, '0')}</td>
+                                      <td style={{ padding: '0.5rem', borderRight: '1px solid #e5e7eb' }}>{ts.available === 1 ? '✓ Yes' : '✗ No'}</td>
+                                      <td style={{ padding: '0.5rem' }}>{ts.bookedByUserID || '—'}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        )}
+                      </>
                     ))}
                   </tbody>
                 </table>
-                {databaseData.timeslots?.length > 50 && <p style={{ marginTop: '0.5rem', color: '#6b7280' }}>Showing first 50 timeslots...</p>}
+                {databaseData.timeslots?.length > 100 && <p style={{ marginTop: '0.5rem', color: '#6b7280' }}>Showing timeslots up to 100...</p>}
               </div>
             </div>
           </div>

@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 const Home = () => {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #eef2ff 0%, #ffffff 50%, #f5f3ff 100%)', position: 'relative' }}>
-      {/* Animation keyframes for the logo across the full viewport */}
       <style>{`
         @keyframes runAcrossViewport {
           0% { transform: translateX(-50vw); }
@@ -12,7 +11,6 @@ const Home = () => {
         }
       `}</style>
 
-      {/* Overlay animation container spanning the full viewport width */}
       <div aria-hidden="true" style={{ position: 'absolute', top: '1rem', left: 0, width: '100%', overflow: 'hidden', height: 140, pointerEvents: 'none' }}>
         <img
           src="/DynaZOR.png"
@@ -26,7 +24,7 @@ const Home = () => {
             Welcome to DynaZOR
           </h1>
           <p style={{ color: '#4b5563', fontSize: '1.1rem' }}>
-            Smart scheduler to manage availability and appointments.
+            A dynamic scheduling platform designed to manage availability and appointments in real time.
           </p>
         </div>
 
@@ -41,6 +39,9 @@ const Home = () => {
               Register
             </div>
           </Link>
+        </div>
+        <div style={{ marginTop: '2rem', textAlign: 'center', color: '#6b7280' }}>
+          <small>Don’t make life ZOR — go DynaZOR. </small>
         </div>
       </div>
     </div>

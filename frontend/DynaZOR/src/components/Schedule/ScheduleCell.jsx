@@ -3,12 +3,13 @@ export default function ScheduleCell({ time, day, item, onClick, isOwner, select
   const isAvailable = item?.available === 1 && item?.bookedByUserID !== currentUserID;
   const isBookedByCurrentUser = item?.available === 1 && item?.bookedByUserID === currentUserID
   const isBooked = item?.available === 0;
+  const bookedByUserID = item?.bookedByUserID;
   const waitlistCount = item?.waitlist_count || 0;
   const hasBooking = item?.bookedByUserID != null;
 
   const handleClick = () => {
     if (onClick) {
-      onClick({ time, day, item, isBookedByCurrentUser});
+      onClick({ time, day, item, isBookedByCurrentUser, hasBooking, bookedByUserID});
     }
   };
 
@@ -140,7 +141,7 @@ export default function ScheduleCell({ time, day, item, onClick, isOwner, select
           </div>
         )}
 		
-		{isBookedByCurrentUser && (
+		    {!isOwner && isBookedByCurrentUser && (
           <div className="flex flex-col items-center">
             <svg className="w-8 h-8 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
@@ -150,9 +151,6 @@ export default function ScheduleCell({ time, day, item, onClick, isOwner, select
           </div>
         )}
 
-        {!isOwner && !item && (
-          <span className="text-[11px] text-gray-500">No slot</span>
-        )}
       </div>
     </div>
   );

@@ -18,8 +18,6 @@ export default function Login() {
 
     try {
       const credentials = { email, password };
-      console.log(credentials)
-
       const res = await login(credentials);
       const userID = res?.userID;
       if (userID) {
@@ -32,7 +30,6 @@ export default function Login() {
 
       setMessage([res.message, "success"]);
       setTimeout(() => {
-        console.log("..." + userID)
         navigate("/dashboard", { state: { userID } });
       }, 1000);
 

@@ -12,14 +12,11 @@ export default function Dashboard({ userID }) {
 
   const isOwner = useMemo(() => {
     const currentUserID = parseInt(localStorage.getItem("userID"));
-    console.log(currentUserID)
-    console.log(userID)
     return currentUserID === parseInt(userID);
   }, [userID]);
 
   useEffect(() => {
     const loadUser = async () => {
-      console.log(isOwner)
       try {
         setLoading(true);
         const user = await getUser(userID);

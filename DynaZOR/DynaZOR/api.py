@@ -219,9 +219,12 @@ class Appointment(Resource):
             selectedTimeslotID = db.getTimeslotID(user_id, date, hour, minute)
             if not is_available:
                 abort(400, message=f"Your schedule is not available for timeslot {hour:02d}:{minute:02d}")
+            
+            # Check if already in waitlist before trying to book
+            if db.isInWaitlist(booker_id, selectedTimeslotID):
+                abort(400, message=f"You're already on queue for timeslot {hour:02d}:{minute:02d}")
+            
             try:
-                if db.isInWaitlist(booker_id,selectedTimeslotID):
-                    abort(400, message=f"Your are already in the waitlist for timeslot {hour:02d}:{minute:02d}")
                 db.schedulerAlgorithm(user_id, date, hour, minute, booker_id)
                 booked.append({'date': date, 'hour': hour, 'minute': minute})
             except Exception as e:

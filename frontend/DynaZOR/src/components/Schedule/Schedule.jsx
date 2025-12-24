@@ -37,35 +37,58 @@ export default function Schedule({ userID }) {
     if (userID) loadSchedule();
   }, [userID]);
 
-  const handleCellClick = async ({ time, day, isBookedByCurrentUser}) => {
+  const handleCellClick = async ({ time, day, isBookedByCurrentUser, hasBooking, bookedByUserID}) => {
     const [hour, minute] = time.split(':').map(Number);
-	const currentUserID = parseInt(localStorage.getItem("userID"));
+    const currentUserID = parseInt(localStorage.getItem("userID"));
 
-	if (isBookedByCurrentUser) {
-		if (window.confirm("Do you want to cancel this appointment?")){
-			try {
-				setLoading(true);
-				const payload = {
-					bookerID: currentUserID,
-					selections: [{date: day, hour, minute}]
-				};
-				await cancelAppointment(userID, payload);
-				setMessage(["Appointment Canceled", "success"]);
-				const data = await getSchedule(userID);
-                setSchedule(data?.schedule || []);
-				const key = `${day}|${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
-                setSelectedSlots(selectedSlots.filter((s) => s.key !== key));
-			} catch (err) {
-				console.error("Error toggling timeslot:", err);
-				setMessage(["Failed to update timeslot", "error"]);
-			} finally {
-				setLoading(false);
-			}
-		}
-		return;
-	}
-	
-    // Owner: toggle directly on backend
+    if (isBookedByCurrentUser) {
+      if (window.confirm("Do you want to cancel this appointment?")){
+        try {
+          setLoading(true);
+          const payload = {
+            bookerID: currentUserID,
+            selections: [{date: day, hour, minute}]
+          };
+          await cancelAppointment(userID, payload);
+          setMessage(["Appointment Canceled", "success"]);
+          const data = await getSchedule(userID);
+                  setSchedule(data?.schedule || []);
+          const key = `${day}|${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
+                  setSelectedSlots(selectedSlots.filter((s) => s.key !== key));
+        } catch (err) {
+          console.error("Error toggling timeslot:", err);
+          setMessage(["Failed to update timeslot", "error"]);
+        } finally {
+          setLoading(false);
+        }
+      }
+      return;
+    }
+
+    if (isOwner && hasBooking) {
+      try {
+        setLoading(true);
+        const payload = {
+          bookerID: currentUserID,
+          selections: [{ date: day, hour, minute }]
+        };
+        // Cancel on the schedule of the person we booked with (bookedByUserID)
+        await cancelAppointment(bookedByUserID, payload);
+        setMessage(["Appointment Canceled", "success"]);
+        const data = await getSchedule(userID);
+        setSchedule(data?.schedule || []);
+        const key = `${day}|${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
+        setSelectedSlots(selectedSlots.filter((s) => s.key !== key));
+      } catch (err) {
+        console.error("Error toggling timeslot:", err);
+        setMessage(["Failed to update timeslot", "error"]);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // Owner: toggle directly on backend when free/busy (no booking)
     if (isOwner) {
       try {
         setLoading(true);

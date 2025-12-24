@@ -5,10 +5,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 const DashboardPage = () => {
-  const { state } = useLocation();
   const navigate = useNavigate();
   const { getUserID } = useAuth();
-  const userID = state?.userID;
   const ID = getUserID();
 
   useEffect(() => {

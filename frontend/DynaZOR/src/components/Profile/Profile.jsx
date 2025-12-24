@@ -65,37 +65,37 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto">
         {/* Header Section */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 mb-6 shadow-lg">
-            <span className="text-4xl text-white">👤</span>
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 mb-4 shadow-lg">
+            <span className="text-3xl text-white">👤</span>
           </div>
-          <h1 className="text-5xl font-extrabold text-gray-900 mb-3">Your Profile</h1>
-          <p className="text-gray-600 text-lg">Manage your personal information</p>
+          <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Your Profile</h1>
+          <p className="text-gray-600">Manage your personal information</p>
         </div>
 
         {/* Main Card */}
-        <div className="bg-white border border-gray-200 shadow-2xl rounded-3xl overflow-hidden">
+        <div className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
           {/* Decorative Header */}
-          <div className="h-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600"></div>
+          <div className="h-1.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600"></div>
           
-          <div className="p-10 sm:p-12">
+          <div className="p-6 sm:p-8">
             {message && (
-              <div className={`mb-8 rounded-xl p-5 text-base font-medium shadow-sm ${message[1] === "error" ? "bg-red-50 text-red-800 border-2 border-red-200" : "bg-green-50 text-green-800 border-2 border-green-200"}`}>
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{message[1] === "error" ? "⚠️" : "✅"}</span>
+              <div className={`mb-6 rounded-lg p-4 text-sm font-medium shadow-sm ${message[1] === "error" ? "bg-red-50 text-red-800 border border-red-200" : "bg-green-50 text-green-800 border border-green-200"}`}>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{message[1] === "error" ? "⚠️" : "✅"}</span>
                   <span>{message[0]}</span>
                 </div>
               </div>
             )}
 
-            <div className="space-y-8">
+            <div className="space-y-5">
               {/* Name Field */}
               <div>
-                <label className="block text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
-                  <span className="text-xl">👤</span>
+                <label className="block text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
+                  <span className="text-base">👤</span>
                   Full Name
                 </label>
                 <input
@@ -103,14 +103,14 @@ export default function Profile() {
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="Enter your full name"
-                  className="w-full border-2 border-gray-300 rounded-xl px-5 py-4 text-lg focus:outline-none focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-200 hover:border-gray-400"
+                  className="w-full border-2 border-gray-300 rounded-lg px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-200 hover:border-gray-400"
                 />
               </div>
 
               {/* Username Field */}
               <div>
-                <label className="block text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
-                  <span className="text-xl">✨</span>
+                <label className="block text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
+                  <span className="text-base">✨</span>
                   Username
                 </label>
                 <input
@@ -118,14 +118,14 @@ export default function Profile() {
                   value={form.username}
                   onChange={(e) => setForm({ ...form, username: e.target.value })}
                   placeholder="Choose a unique username"
-                  className="w-full border-2 border-gray-300 rounded-xl px-5 py-4 text-lg focus:outline-none focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-200 hover:border-gray-400"
+                  className="w-full border-2 border-gray-300 rounded-lg px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-200 hover:border-gray-400"
                 />
               </div>
 
               {/* Email Field */}
               <div>
-                <label className="block text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
-                  <span className="text-xl">📧</span>
+                <label className="block text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
+                  <span className="text-base">📧</span>
                   Email Address
                 </label>
                 <input
@@ -133,16 +133,16 @@ export default function Profile() {
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   placeholder="your.email@example.com"
-                  className="w-full border-2 border-gray-300 rounded-xl px-5 py-4 text-lg focus:outline-none focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-200 hover:border-gray-400"
+                  className="w-full border-2 border-gray-300 rounded-lg px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-200 hover:border-gray-400"
                 />
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="mt-12 flex flex-col sm:flex-row justify-end gap-4">
+            <div className="mt-8 flex flex-col sm:flex-row justify-end gap-3">
               <button
                 onClick={() => navigate(-1)}
-                className="px-8 py-4 rounded-xl border-2 border-gray-300 text-gray-700 text-lg font-bold hover:bg-gray-100 hover:border-gray-400 transition-all duration-200 shadow-sm"
+                className="px-6 py-2.5 rounded-lg border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 hover:border-gray-400 transition-all duration-200 shadow-sm"
                 disabled={saving}
               >
                 Cancel
@@ -150,26 +150,21 @@ export default function Profile() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-8 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-lg font-bold hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-400 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-400 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 {saving ? (
-                  <span className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                  <span className="flex items-center gap-2 justify-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
                     Saving...
                   </span>
                 ) : (
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-2 justify-center">
                     💾 Save Changes
                   </span>
                 )}
               </button>
             </div>
           </div>
-        </div>
-
-        {/* Info Footer */}
-        <div className="text-center mt-8 text-gray-500 text-sm">
-          <p>Your information is securely stored and protected.</p>
         </div>
       </div>
     </div>

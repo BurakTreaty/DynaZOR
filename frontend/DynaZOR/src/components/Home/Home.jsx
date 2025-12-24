@@ -3,14 +3,30 @@ import { Link } from 'react-router-dom';
 
 const Home = () => {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #eef2ff 0%, #ffffff 50%, #f5f3ff 100%)' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #eef2ff 0%, #ffffff 50%, #f5f3ff 100%)', position: 'relative' }}>
+      {/* Animation keyframes for the logo across the full viewport */}
+      <style>{`
+        @keyframes runAcrossViewport {
+          0% { transform: translateX(-50vw); }
+          100% { transform: translateX(100vw); }
+        }
+      `}</style>
+
+      {/* Overlay animation container spanning the full viewport width */}
+      <div aria-hidden="true" style={{ position: 'absolute', top: '1rem', left: 0, width: '100%', overflow: 'hidden', height: 140, pointerEvents: 'none' }}>
+        <img
+          src="/DynaZOR.png"
+          alt=""
+          style={{ height: 120, objectFit: 'contain', display: 'inline-block', willChange: 'transform', animation: 'runAcrossViewport 6s linear infinite' }}
+        />
+      </div>
       <div style={{ maxWidth: 900, width: '100%', padding: '2rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '0.5rem', background: 'linear-gradient(90deg, #4f46e5, #7c3aed)', WebkitBackgroundClip: 'text', color: 'transparent' }}>
             Welcome to DynaZOR
           </h1>
           <p style={{ color: '#4b5563', fontSize: '1.1rem' }}>
-            Simple scheduling to manage availability and appointments.
+            Smart scheduler to manage availability and appointments.
           </p>
         </div>
 
@@ -25,10 +41,6 @@ const Home = () => {
               Register
             </div>
           </Link>
-        </div>
-
-        <div style={{ marginTop: '2rem', textAlign: 'center', color: '#6b7280' }}>
-          <small>Tip: Owners can toggle slots; viewers can select up to three.</small>
         </div>
       </div>
     </div>

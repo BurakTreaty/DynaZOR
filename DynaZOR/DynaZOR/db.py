@@ -232,6 +232,34 @@ def addWaitList(timeslot_id, user_id):
 
 def freeSlotDB(timeSlotID):
     cursor.execute("""
+        SELECT ts.hour, ts.minute, ts.bookedByUserID, us.scheduleDate
+        FROM timeslots ts
+        JOIN userSchedule us ON us.scheduleID = ts.scheduleID
+        WHERE timeSlotID = ?
+    """, (timeSlotID,))
+
+    row = cursor.fetchone()
+    hour = row[0]
+    minute = row[1]
+    bookerID = row[2]
+    date = row[3]
+
+    cursor.execute("""
+        UPDATE timeslots
+        SET bookedByUserID = NULL
+        WHERE timeSlotID IN (
+            SELECT ts.timeSlotID
+            FROM timeslots ts
+            JOIN userSchedule us ON ts.scheduleID = us.scheduleID
+            WHERE us.scheduleDate = ?
+            AND us.userID = ?
+            AND ts.hour = ?
+            AND ts.minute = ?
+        )
+    """, (date,bookerID,hour,minute))
+    conn.commit()
+
+    cursor.execute("""
         UPDATE timeslots
         SET bookedByUserID = NULL
         WHERE timeSlotID = ?
@@ -256,6 +284,7 @@ def addAppointmentDB(timeslotID, appointedTimeslotID, userID):
         SET bookedByUserID = ?
         WHERE timeSlotID = ?
     """, (userID, timeslotID))
+    conn.commit()
     
     # Set available=0 and bookedByUserID on the booker's timeslot
     cursor.execute("""
@@ -331,7 +360,7 @@ def reopenSlotForBooker(user_id, date, hour, minute):
     timeslotID = getTimeslotID(user_id, date, hour, minute)
     cursor.execute("""
         UPDATE timeslots
-        SET available = 1
+        SET available = 1, bookedByUserID = NULL
         WHERE timeSlotID = ?
     """, (timeslotID,))
     conn.commit()
@@ -522,3 +551,16 @@ def checkAdminLogin(username, password):
 def getEmailByUserID(user_id):
     cursor.execute("SELECT email FROM users WHERE userID = ?", (user_id,))
     return cursor.fetchone()[0]
+
+def checkHasAppointment(user_id, date, hour, minute):
+    cursor.execute("""
+        SELECT *
+        FROM timeslots ts
+        JOIN userSchedule us ON ts.scheduleID = us.scheduleID
+        WHERE ts.bookedByUserID = ?
+        AND us.scheduleDate = ?
+        AND ts.hour = ?
+        AND ts.minute = ?
+    """, (user_id, date, hour, minute))
+
+    return cursor.fetchone() is not None

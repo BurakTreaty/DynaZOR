@@ -1,6 +1,12 @@
 DynaZOR
+DynaZOR is a cloud-based scheduling and rendezvous system designed to automate appointment management between users. The goal is to eliminate manual scheduling errors and reduce communication delays by using AWS services for storing data and notifications.
 
 Deployed frontend of DynaZOR with the backend connection: https://dyna-zor.vercel.app
+However, if you want to run it locally:
+1) Downlaod all the required libaries both for backend and frontend
+2) Run the backend server (app.py will be the main py file)
+3) Run the frontend server (execute "npm run dev" on frontend folder [.../DynaZOR/frontend/DynaZOR])
+Note: Frontend server is the main web server to browse pages, while backend server is opened to apply logic.
 
 fronted of DynaZOR
 This repository contains the frontend implementation of the DynaZOR Scheduling System in the frontend folder of the repository, developed as part of the CNG 495 Capstone Project (Fall 2025).

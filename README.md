@@ -27,9 +27,10 @@ React Router – Client side routing [![React Router](https://img.shields.io/bad
 
 ### Database:
 
-PostgreSQL [![Postgres](https://img.shields.io/badge/Postgres-%23316192.svg?logo=postgresql&logoColor=white)](#) 
+Microsoft SQL Server [![Microsoft SQL Server](https://custom-icon-badges.demolab.com/badge/Microsoft%20SQL%20Server-CC2927?logo=mssqlserver-white&logoColor=white)](#)
 
 ### Deployment & Cloud
+Amazon RDS (Relational Database Service) - Cloud database
 
 Render – Backend hosting 
 
